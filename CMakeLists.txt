@@ -50,8 +50,9 @@ add_library(${PROJECT_NAME}_plugin SHARED src/gazebo_ros_link_attacher.cpp)
 
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_plugin ${ament_cmake_LIBRARIES} ${GAZEBO_LIBRARIES})
-
+ament_target_dependencies(${PROJECT_NAME}_plugin
+  "gazebo_ros"
+  "rclcpp")
 
 # Connect targets with locally defined messages
 get_available_rmw_implementations(rmw_implementations2)
@@ -59,7 +60,8 @@ foreach(rmw_implementation ${rmw_implementations2})
   find_package("${rmw_implementation}" REQUIRED)
   get_rmw_typesupport(typesupport_impls "${rmw_implementation}" LANGUAGE "cpp")
   foreach(typesupport_impl ${typesupport_impls})
-    rosidl_target_interfaces(${PROJECT_NAME}_plugin ${PROJECT_NAME} ${typesupport_impl})
+    rosidl_get_typesupport_target(typesupport_target "${PROJECT_NAME}" "${typesupport_impl}")
+    target_link_libraries(${PROJECT_NAME}_plugin "${typesupport_target}")
   endforeach()
 endforeach()
 
